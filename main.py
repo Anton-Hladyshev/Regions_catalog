@@ -1,8 +1,4 @@
 from fastapi import FastAPI, Query, Path, HTTPException
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.redis import RedisBackend
-from fastapi_cache.decorator import cache
-from redis import asyncio as aioredis
 from typing import Union
 from typing_extensions import Annotated
 
@@ -14,7 +10,6 @@ app = FastAPI(title='Довідник КАТОТТГ')
 
 
 @app.get("/api/katottg/{code}", response_model=Unit_Model)
-@cache(expire=86400)
 def get_unit_by_code(code: Annotated[str, Path(description='Код КАТОТТГ', max_length=19)]):
     try:
         unit = Territory_frame(code=code)
@@ -24,7 +19,6 @@ def get_unit_by_code(code: Annotated[str, Path(description='Код КАТОТТ�
         raise HTTPException(status_code=404, detail='Територіальну одиницю не знайдено')
 
 @app.get("/api/katottg", response_model=Catalog_of_units)
-@cache(expire=86400)
 def get_list_of_units(page: Annotated[Union[int, None], Query(description='Номер сторінки', ge=1, le=10000)] = 1,
                       page_size: Annotated[Union[int, None], Query(description='Кількість елементів на сторінці', gt=1, le=1000)] = 20,
                       code: Annotated[Union[str, None], Query(description='Фільтр по коду КАТОТТГ')] = None,
@@ -48,8 +42,3 @@ def get_list_of_units(page: Annotated[Union[int, None], Query(description='Но�
 
     except IndexError:
         raise HTTPException(status_code=404, detail='Територіальну одиницю не знайдено')
-
-@app.on_event('startup')
-async def sturtup():
-    redis = aioredis.from_url("redis://localhost")
-    FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")

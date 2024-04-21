@@ -3,7 +3,7 @@ from typing import Union
 import re
 from transliterate import translit
 
-df = pd.read_excel("Кодифікатор_1901.xlsx")
+df = pd.read_excel("Territories_bd.xlsx")
 df = df[2:]
 df.columns = df.iloc[0]
 df = df[1:]

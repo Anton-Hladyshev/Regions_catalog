@@ -5,7 +5,7 @@ from fastapi import FastAPI, HTTPException, Path, Query
 from models import CatalogOfUnits, UnitModel
 from output_classes import TerritoriesCatalog, TerritoryFrame
 
-app = FastAPI(title="Довідник КАТОТТГ")
+app = FastAPI(title="Довідник КАТОТТГ", docs_url='/', redoc_url=None)
 
 
 @app.get("/api/katottg/{code}", response_model=UnitModel)

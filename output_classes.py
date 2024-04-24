@@ -144,7 +144,7 @@ class TerritoriesCatalog:
     def has_previous(self, query) -> bool:
         page_to_verify = 1
         if (
-            query[(self.page_size * page_to_verify) - self.page_size : page_to_verify * self.page_size].shape[0] > 0
+            query[(self.page_size * page_to_verify) - self.page_size: page_to_verify * self.page_size].shape[0] > 0
             and self.page > 1
         ):
             return True

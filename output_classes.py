@@ -92,8 +92,8 @@ class TerritoryFrame:
     def show_result(self) -> dict:
         dct_res = {
             "code": self.code,
-            "name": self.name,
-            "name_en": translit(self.name, "uk", reversed=True),
+            "name": self.name.strip(),
+            "name_en": translit(self.name, "uk", reversed=True).strip(),
             "level": self.level + 1,
             "parent_id": self.parent_id,
             "category": self.category,

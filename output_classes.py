@@ -1,4 +1,5 @@
 import re
+from typing import Dict
 
 import pandas as pd
 from transliterate import translit
@@ -204,38 +205,40 @@ class TerritoriesCatalog:
         else:
             return ""
 
-    def search_by_pattern(self, query) -> pd.DataFrame | pd.Series:
+    def search_by_pattern(self, query) -> pd.DataFrame:
         if self.search is not None:
-            if isinstance(query, pd.DataFrame):
-                return query[df["Назва об’єкта"].str.contains(self.search, flags=re.IGNORECASE, regex=True)]
+            if isinstance(query, pd.Series):
+                query = pd.DataFrame([query])
+            return query[df['Назва об’єкта'].str.contains(self.search, flags=re.IGNORECASE, regex=True)]
 
-            elif isinstance(query, pd.Series):
-                filtred_series = query.str.extract(f"({self.search})", expand=False).notna()
-                if filtred_series.iloc[6]:
-                    return query
-
-                else:
-                    return pd.DataFrame([])
         else:
             return query
 
-    def compose_and_show_result(self) -> dict:
-        result_query_in_string = (
-            f"df{self.set_parent()}{self.set_code()}{self.set_name()}{self.set_level()}{self.set_category()}"
-        )
+    def index_sample(self, query) -> pd.DataFrame | pd.Series:
+        if isinstance(query, pd.Series):
+            query = pd.DataFrame([query])
+        return query.iloc[(self.page_size*self.page) - self.page_size:self.page*self.page_size]
+
+    def compose_and_show_result(self) -> Dict:
+        result_query_in_string = f"df{self.set_parent()}{self.set_code()}{self.set_name()}{self.set_level()}{self.set_category()}"
         print(result_query_in_string)
         intermidiate_query = eval(result_query_in_string)
         has_next = self.has_next(intermidiate_query.shape[0])
         has_previous = self.has_previous(intermidiate_query)
-        result_query_in_string += f".iloc[{(self.page_size*self.page) - self.page_size}:{self.page*self.page_size}]"
-        dct_res = {"has_next": has_next, "has_previous": has_previous, "page": self.page, "result": []}
+        result_query = self.search_by_pattern(intermidiate_query)
+        result_query = self.index_sample(result_query)
+        dct_res = {
+            'has_next': has_next,
+            'has_previous': has_previous,
+            'page': self.page,
+            'result': []
+        }
 
-        result_query = self.search_by_pattern(eval(result_query_in_string))
         if isinstance(result_query, pd.Series):
-            dct_res["result"].append(TerritoryFrame(result_query).show_result())
+            dct_res['result'].append(TerritoryFrame(result_query).show_result())
 
         else:
             for index, element in result_query.iterrows():
-                dct_res["result"].append(TerritoryFrame(element).show_result())
+                dct_res['result'].append(TerritoryFrame(element).show_result())
 
         return dct_res
